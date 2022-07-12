@@ -1,0 +1,117 @@
+﻿Public Function Login()
+CloseAllBrowsers()
+ If LCase(DataTable.Value("Browser","Global"))="ch" Then
+SystemUtil.Run"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe", DataTable.Value("URL", "Global"),,,3
+wait 2
+'Else
+'SystemUtil.Run "C:\Program Files (x86)\Internet Explorer\iexplore.exe",DataTable.Value("URL","Global"),,,3
+End If
+wait 2
+
+End Function
+Public Function CloseAllBrowsers()
+SystemUtil.CloseProcessByName "chrome.exe"
+SystemUtil.CloseProcessByName "Iexplore.exe"
+SystemUtil.CloseProcessByName "Edge.exe"	
+End Function
+
+Public Function Apply()
+If Browser("iLAB – Software Quality").Page("iLAB – Software Quality").Link("CAREERS").Exist(5) Then
+Browser("iLAB – Software Quality").Page("iLAB – Software Quality").Link("CAREERS").Click
+End If
+wait 2
+If Browser("iLAB – Software Quality").Page("CAREERS – iLAB").Link("South Africa").Exist(5) Then
+ Browser("iLAB – Software Quality").Page("CAREERS – iLAB").Link("South Africa").Click
+End If
+wait 2
+If Browser("iLAB – Software Quality").Page("SOUTH AFRICA – iLAB").Link("Interns - BSC Computer").Exist(5) Then
+Browser("iLAB – Software Quality").Page("SOUTH AFRICA – iLAB").Link("Interns - BSC Computer").Click
+End If
+wait 2
+If Browser("iLAB – Software Quality").Page("Interns – BSC Computer").Link("Apply Online").Exist(5)Then
+Browser("iLAB – Software Quality").Page("Interns – BSC Computer").Link("Apply Online").Highlight
+Browser("iLAB – Software Quality").Page("Interns – BSC Computer").Link("Apply Online").Click
+End If
+wait 2
+If Browser("iLAB – Software Quality").Page("Interns – BSC Computer").WebEdit("applicant_name").Exist(5) Then
+Browser("iLAB – Software Quality").Page("Interns – BSC Computer").WebEdit("applicant_name").Highlight
+Browser("iLAB – Software Quality").Page("Interns – BSC Computer").WebEdit("applicant_name").Set DataTable.Value("Name")
+End if
+wait 1
+if Browser("iLAB – Software Quality").Page("Interns – BSC Computer").WebEdit("email").Exist(5) Then
+Browser("iLAB – Software Quality").Page("Interns – BSC Computer").WebEdit("email").Highlight
+Browser("iLAB – Software Quality").Page("Interns – BSC Computer").WebEdit("email").Set DataTable.Value("Email")
+End If
+wait 1
+ 'Autogenerate Phone Number
+dim ContactNumber
+
+Dim sMaxVal : sMaxVal = ""
+Dim iLength : iLength = 7
+
+For iL = 1 to iLength
+sMaxVal = sMaxVal & "9"
+Next
+sMaxVal = Int(sMaxVal)
+Randomize
+iTmp = Int((sMaxVal * Rnd) + 1)
+'Add Trailing Zeros if required
+iLen = Len(iTmp)
+fnRandomNumber = iTmp * (10 ^(iLength - iLen))
+NewNum = "083"&fnRandomNumber
+  
+if Browser("iLAB – Software Quality").Page("Interns – BSC Computer").WebEdit("phone").Exist(5) Then
+Browser("iLAB – Software Quality").Page("Interns – BSC Computer").WebEdit("phone").Highlight
+Browser("iLAB – Software Quality").Page("Interns – BSC Computer").WebEdit("phone").Set NewNum
+End If
+wait 1
+If Browser("iLAB – Software Quality").Page("Interns – BSC Computer").WebButton("Send Application").Exist(5) Then
+Browser("iLAB – Software Quality").Page("Interns – BSC Computer").WebButton("Send Application").Click
+DataTable.Value("Results") = "Passed"
+else
+DataTable.Value("Results") = "Failed"
+End If 
+wait 3
+ScreenCapture()
+End Function
+
+Public Function ScreenCapture()
+Dim objFSO, objFolder, strPath
+
+'First folder
+strPath= "C:\Screen shot"
+strPaths = "C:\Screen shot\No upload" 
+Set objFSO = CreateObject("Scripting.FileSystemObject")
+
+'If the main folder exists or not
+If objFSO.FolderExists(strpath)= "True" then
+ Reporter.ReportEvent micPass, "Folder: ", "Folder Screen shot already exist"
+ELSE
+Set objFolder = objFSO.CreateFolder(strPath)
+End if
+
+Dim date_time
+Dim myfile
+
+date_time = Now()
+myfile = date_time&".png"
+myfile = replace(myfile,"/","-")
+myfile = replace(myfile,":","-")
+myfile =  "C:\Screen shot"&myfile
+If Browser("iLAB – Software Quality").Page("Interns – BSC Computer").Exist(5) Then
+Browser("iLAB – Software Quality").Page("Interns – BSC Computer").CaptureBitmap myfile, True
+'DataTable.Value("Screenshot","Global")=myfile
+End if
+End Function
+Public Function CreateFolder()
+Dim strFolderpath, obj
+
+Set obj = Createobject("Scripting.FileSystemObject")
+strFolderpath = "C:\Users\"&Environment.Value("UserName")&"\Desktop\Results"
+If obj.FolderExists(strFolderpath) = false Then
+ obj.CreateFolder strFolderpath
+End If
+DataTable.ExportSheet "C:\Users\"&Environment.Value("UserName")&"\Desktop\\Results\iLabResults.xls", 1
+Set obj = nothing
+End Function
+
